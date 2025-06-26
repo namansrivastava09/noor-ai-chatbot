@@ -3,15 +3,14 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // By default, deny all reads and writes
+    // Default to denying all access.
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Allow reading the collection (for history) and creating new messages
-    // only for the specific user path. Update and delete are not allowed.
+    // Allow the app to list messages for the history and create new messages.
     match /users/katyayani_uid/messages/{messageId} {
-      allow read, create: if true;
+      allow list, create: if true;
     }
   }
 }
