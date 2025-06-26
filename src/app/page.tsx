@@ -5,7 +5,7 @@ import { Send, User, Mic, MicOff, Volume2 } from "lucide-react";
 
 import type { Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { getInitialMessage, sendMessage } from "./actions";
+import { getInitialMessage, sendMessage, getChatHistory } from "./actions";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -29,23 +29,27 @@ export default function ChatPage() {
   const recognitionRef = React.useRef<SpeechRecognition | null>(null);
 
   React.useEffect(() => {
-    const fetchInitialMessage = async () => {
+    const fetchHistory = async () => {
       try {
         setIsLoading(true);
-        const initialMessage = await getInitialMessage();
-        setMessages([initialMessage]);
+        let history = await getChatHistory();
+        if (history.length === 0) {
+          const initialMessage = await getInitialMessage();
+          history = [initialMessage];
+        }
+        setMessages(history);
       } catch (error) {
-        console.error("Error fetching initial message:", error);
+        console.error("Error fetching chat history:", error);
         toast({
           variant: "destructive",
           title: "Uh oh! Something went wrong.",
-          description: "Could not start the conversation.",
+          description: "Could not load the conversation.",
         });
       } finally {
         setIsLoading(false);
       }
     };
-    fetchInitialMessage();
+    fetchHistory();
   }, [toast]);
 
   React.useEffect(() => {

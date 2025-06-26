@@ -8,7 +8,27 @@ import {
   generateResponse,
   type GenerateResponseInput,
 } from "@/ai/flows/generate-response-from-message";
+import { firestore, serverTimestamp } from "@/lib/firebase";
 import type { Message } from "@/lib/types";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  orderBy,
+  query,
+} from "firebase/firestore";
+
+const USER_ID = "katyayani_uid";
+const messagesCol = collection(firestore, "users", USER_ID, "messages");
+
+const docToMessage = (doc: any): Message => {
+  const data = doc.data();
+  return {
+    id: doc.id,
+    role: data.sender === "Noor" ? "assistant" : "user",
+    content: data.text,
+  };
+};
 
 function getDateTimeInfo() {
   const now = new Date();
@@ -26,6 +46,12 @@ function getDateTimeInfo() {
   };
 }
 
+export async function getChatHistory(): Promise<Message[]> {
+  const q = query(messagesCol, orderBy("timestamp", "asc"));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(docToMessage);
+}
+
 export async function getInitialMessage(): Promise<Message> {
   const { time, date, day } = getDateTimeInfo();
   const input: GenerateInitialResponseInput = {
@@ -34,8 +60,16 @@ export async function getInitialMessage(): Promise<Message> {
     currentDay: day,
   };
   const content = await generateInitialResponse(input);
+
+  const messageData = {
+    sender: "Noor",
+    text: content,
+    timestamp: serverTimestamp(),
+  };
+  const docRef = await addDoc(messagesCol, messageData);
+
   return {
-    id: crypto.randomUUID(),
+    id: docRef.id,
     role: "assistant",
     content,
   };
@@ -43,13 +77,19 @@ export async function getInitialMessage(): Promise<Message> {
 
 export async function sendMessage(messages: Message[]): Promise<Message> {
   const history = messages
-    .map((m) => `${m.role}: ${m.content}`)
+    .map((m) => `${m.role === "user" ? "Katyayani" : "Noor"}: ${m.content}`)
     .join("\n");
   const lastMessage = messages[messages.length - 1];
 
   if (lastMessage.role !== "user") {
     throw new Error("Last message must be from the user");
   }
+
+  await addDoc(messagesCol, {
+    sender: "Katyayani",
+    text: lastMessage.content,
+    timestamp: serverTimestamp(),
+  });
 
   const { time, date, day } = getDateTimeInfo();
 
@@ -63,8 +103,14 @@ export async function sendMessage(messages: Message[]): Promise<Message> {
 
   const result = await generateResponse(input);
 
+  const docRef = await addDoc(messagesCol, {
+    sender: "Noor",
+    text: result.response,
+    timestamp: serverTimestamp(),
+  });
+
   return {
-    id: crypto.randomUUID(),
+    id: docRef.id,
     role: "assistant",
     content: result.response,
   };
