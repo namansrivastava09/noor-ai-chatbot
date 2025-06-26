@@ -1,10 +1,13 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // This allows read/write access to the messages collection for katyayani_uid
-    // The recursive wildcard {document=**} is important to allow list operations (queries).
-    match /users/katyayani_uid/messages/{document=**} {
-      allow read, write: if true;
+    // This allows listing documents in the messages collection for the specific user.
+    match /users/katyayani_uid/messages {
+      allow list: if true;
+    }
+    // This allows reading and writing individual documents in that collection.
+    match /users/katyayani_uid/messages/{messageId} {
+      allow get, write: if true;
     }
   }
 }
