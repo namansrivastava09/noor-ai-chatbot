@@ -2,6 +2,7 @@
 
 import {
   generateInitialResponse,
+  type GenerateInitialResponseInput,
 } from "@/ai/flows/generate-initial-response";
 import {
   generateResponse,
@@ -9,8 +10,18 @@ import {
 } from "@/ai/flows/generate-response-from-message";
 import type { Message } from "@/lib/types";
 
+function getCurrentTime(): string {
+  const now = new Date();
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
 export async function getInitialMessage(): Promise<Message> {
-  const content = await generateInitialResponse({});
+  const input: GenerateInitialResponseInput = {
+    currentTime: getCurrentTime(),
+  };
+  const content = await generateInitialResponse(input);
   return {
     id: crypto.randomUUID(),
     role: "assistant",
@@ -31,6 +42,7 @@ export async function sendMessage(messages: Message[]): Promise<Message> {
   const input: GenerateResponseInput = {
     message: lastMessage.content,
     chatHistory: history,
+    currentTime: getCurrentTime(),
   };
 
   const result = await generateResponse(input);
