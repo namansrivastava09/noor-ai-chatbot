@@ -16,9 +16,9 @@ Your chatbot uses Google's Generative AI (Gemini). To use it on Netlify, you nee
 
 ### Step 2: Download and Unzip Your Project
 
-To move your code to GitHub and Netlify, you first need to download it from Firebase Studio.
+To move your code to GitHub and Netlify, you first need to download it from this Firebase Studio environment.
 
-1.  **Find the Download Button:** In the top bar of the Firebase Studio interface, you will see a **"Download code"** button.
+1.  **Find the Download Button:** In the top bar of the Firebase Studio interface (the web page you are currently using), you will see a **"Download code"** button. This is a feature of this specific editor.
 2.  **Download the ZIP File:** Click this button. Your browser will download a single `.zip` file containing your entire project (e.g., `noor-ai-chatbot.zip`). This file will likely be in your computer's "Downloads" folder.
 3.  **Unzip the Project:** Find the downloaded `.zip` file on your computer and extract its contents.
     *   On **Windows**, right-click the file and choose "Extract All...".
@@ -47,7 +47,7 @@ Netlify deploys directly from a Git repository.
 1.  Sign up for a free **[Netlify](https://www.netlify.com/)** account (it's easiest to sign up with your GitHub account).
 2.  On your Netlify dashboard, click "**Add new site**" and select "**Import an existing project**".
 3.  Connect to GitHub and authorize Netlify. Select the GitHub repository you just created.
-4.  Netlify will automatically detect that this is a Next.js project and fill in the correct build settings. Because we included a `netlify.toml` file, they should be correct, but you can verify they are:
+4.  Netlify will automatically detect that this is a Next.js project and fill in the correct build settings. They should be:
     *   **Build command:** `next build`
     *   **Publish directory:** `.next`
 5.  Before deploying, go to the "**Advanced build settings**" or "**Environment variables**" section.
@@ -66,7 +66,7 @@ This is a **critical security step** to ensure Firebase allows your live app to 
 2.  Go to your **[Firebase Console](https://console.firebase.google.com/)** and select your project (`noorchat-3a26e`).
 3.  In the left-hand menu, go to **Authentication** -> **Settings** tab.
 4.  Under the **Authorized domains** section, click "**Add domain**".
-5.  Paste your Netlify URL (e.g., `noor-ai-chatbot.netlify.app`) and click "Add".
+5.  Paste your Netlify URL (e.g., `noorchat-3a26e.netlify.app`) and click "Add".
 
 Your chatbot is now live, secure, and ready to be shared with Katyayani!
 

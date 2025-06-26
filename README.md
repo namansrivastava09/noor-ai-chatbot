@@ -16,9 +16,9 @@ Your chatbot uses Google's Generative AI (Gemini). To use it on Netlify, you nee
 
 ### Step 2: Download and Unzip Your Project
 
-To move your code to GitHub and Netlify, you first need to download it from Firebase Studio.
+To move your code to GitHub and Netlify, you first need to download it from this Firebase Studio environment.
 
-1.  **Find the Download Button:** In the top bar of the Firebase Studio interface, you will see a **"Download code"** button.
+1.  **Find the Download Button:** In the top bar of the Firebase Studio interface (the web page you are currently using), you will see a **"Download code"** button. This is a feature of this specific editor.
 2.  **Download the ZIP File:** Click this button. Your browser will download a single `.zip` file containing your entire project (e.g., `noor-ai-chatbot.zip`). This file will likely be in your computer's "Downloads" folder.
 3.  **Unzip the Project:** Find the downloaded `.zip` file on your computer and extract its contents.
     *   On **Windows**, right-click the file and choose "Extract All...".
