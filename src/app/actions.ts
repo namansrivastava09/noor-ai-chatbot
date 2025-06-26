@@ -10,16 +10,28 @@ import {
 } from "@/ai/flows/generate-response-from-message";
 import type { Message } from "@/lib/types";
 
-function getCurrentTime(): string {
+function getDateTimeInfo() {
   const now = new Date();
-  const hours = now.getHours().toString().padStart(2, '0');
-  const minutes = now.getMinutes().toString().padStart(2, '0');
-  return `${hours}:${minutes}`;
+  const hours = now.getHours().toString().padStart(2, "0");
+  const minutes = now.getMinutes().toString().padStart(2, "0");
+
+  return {
+    time: `${hours}:${minutes}`,
+    date: now.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
+    day: now.toLocaleDateString("en-GB", { weekday: "long" }),
+  };
 }
 
 export async function getInitialMessage(): Promise<Message> {
+  const { time, date, day } = getDateTimeInfo();
   const input: GenerateInitialResponseInput = {
-    currentTime: getCurrentTime(),
+    currentTime: time,
+    currentDate: date,
+    currentDay: day,
   };
   const content = await generateInitialResponse(input);
   return {
@@ -39,10 +51,14 @@ export async function sendMessage(messages: Message[]): Promise<Message> {
     throw new Error("Last message must be from the user");
   }
 
+  const { time, date, day } = getDateTimeInfo();
+
   const input: GenerateResponseInput = {
     message: lastMessage.content,
     chatHistory: history,
-    currentTime: getCurrentTime(),
+    currentTime: time,
+    currentDate: date,
+    currentDay: day,
   };
 
   const result = await generateResponse(input);
