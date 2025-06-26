@@ -81,23 +81,23 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen w-full flex-col items-center bg-background">
-      <div className="flex h-full w-full max-w-2xl flex-col shadow-lg">
-        <header className="flex items-center justify-between border-b bg-card p-4">
-          <div className="flex items-center gap-3">
+    <div className="flex h-dvh w-full flex-col items-center bg-background">
+      <div className="flex h-full w-full max-w-2xl flex-col sm:shadow-lg">
+        <header className="flex items-center justify-between border-b bg-card p-2 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Avatar className="h-10 w-10 border-2 border-primary">
               <AvatarFallback className="bg-primary text-xl font-bold text-primary-foreground">
                 N
               </AvatarFallback>
             </Avatar>
-            <h1 className="font-headline text-xl font-bold text-foreground">
+            <h1 className="font-headline text-lg font-bold text-foreground sm:text-xl">
               Noor
             </h1>
           </div>
         </header>
 
         <ScrollArea className="flex-1" viewportRef={scrollAreaViewportRef}>
-          <div className="p-4">
+          <div className="p-2 sm:p-4">
             {messages.map((msg) => (
               <ChatMessage key={msg.id} message={msg} />
             ))}
@@ -105,8 +105,8 @@ export default function ChatPage() {
           </div>
         </ScrollArea>
 
-        <div className="border-t bg-card p-4">
-          <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        <div className="border-t bg-card p-2 sm:p-4">
+          <form onSubmit={handleSubmit} className="flex items-center gap-1 sm:gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
