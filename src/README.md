@@ -47,9 +47,12 @@ Netlify deploys directly from a Git repository.
 1.  Sign up for a free **[Netlify](https://www.netlify.com/)** account (it's easiest to sign up with your GitHub account).
 2.  On your Netlify dashboard, click "**Add new site**" and select "**Import an existing project**".
 3.  Connect to GitHub and authorize Netlify. Select the GitHub repository you just created.
-4.  Netlify will automatically detect that this is a Next.js project and fill in the correct build settings. They should be:
+4.  Netlify will automatically detect that this is a Next.js project. You need to ensure the build settings are correct.
     *   **Build command:** `next build`
     *   **Publish directory:** `.next`
+    
+    **IMPORTANT:** The publish directory **must** be `.next`. Do NOT use `out`. Your application is dynamic and uses server-side features to talk to the AI. Using `out` would attempt a static export, which is not compatible with your app and will cause the build to fail. The `netlify.toml` file in your repository is already configured with these correct settings, but it's good to verify them in the Netlify UI.
+
 5.  Before deploying, go to the "**Advanced build settings**" or "**Environment variables**" section.
 6.  Add a new variable:
     *   **Key:** `GOOGLE_API_KEY`
@@ -72,5 +75,5 @@ Your chatbot is now live, secure, and ready to be shared with Katyayani!
 
 ### Common Mistakes to Avoid
 *   **Forgetting Environment Variables**: If you forget to add the `GOOGLE_API_KEY` in Netlify, the AI will not work.
-*   **Wrong Publish Directory**: Make sure the publish directory is set to `.next`. If it's set to something else (like `build` or `public`), the deployment will fail. Netlify usually gets this right automatically for Next.js.
+*   **Wrong Publish Directory**: Make sure the publish directory is set to `.next`. If it's set to something else (like `out` or `build`), the deployment will fail.
 *   **Not Whitelisting the Domain**: If you don't add your Netlify URL to the Firebase "Authorized domains", Firestore will block requests from your live app, and the chat history won't load or save.
