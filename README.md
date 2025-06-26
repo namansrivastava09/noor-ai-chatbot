@@ -21,7 +21,7 @@ Your chatbot uses Google's Generative AI (Gemini). To use it on Vercel, you need
 To move your code to GitHub and Vercel, you first need to download it from Firebase Studio.
 
 1.  **Find the Download Button:** In the top bar of the Firebase Studio interface, you will see a **"Download code"** button.
-2.  **Download the ZIP File:** Click this button. Your browser will download a single `.zip` file containing your entire project (e.g., `noorchat.zip`). This file will likely be in your computer's "Downloads" folder.
+2.  **Download the ZIP File:** Click this button. Your browser will download a single `.zip` file containing your entire project (e.g., `noor-ai-chatbot.zip`). This file will likely be in your computer's "Downloads" folder.
 3.  **Unzip the Project:** Find the downloaded `.zip` file on your computer and extract its contents.
     *   On **Windows**, right-click the file and choose "Extract All...".
     *   On a **Mac**, simply double-click the file.
@@ -51,8 +51,8 @@ Vercel deploys directly from a Git repository.
 3.  Find the GitHub repository you just created and click "Import".
 4.  Vercel will recognize it as a Next.js project. Before deploying, expand the "Environment Variables" section.
 5.  Add a new variable:
-    -   **Name:** `GOOGLE_API_KEY`
-    -   **Value:** Paste the API key you copied from Google AI Studio in Step 1.
+    *   **Name:** `GOOGLE_API_KEY`
+    *   **Value:** Paste the API key you copied from Google AI Studio in Step 1.
 6.  Click "Deploy".
 
 That's it! Vercel will build and deploy your site. Once it's done, it will give you a public URL that you can share with Katyayani.
