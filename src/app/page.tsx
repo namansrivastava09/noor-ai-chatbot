@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Send, User, Mic, MicOff } from "lucide-react";
+import { Send, User, Mic, MicOff, Volume2 } from "lucide-react";
 
 import type { Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -19,9 +19,13 @@ export default function ChatPage() {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [input, setInput] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isListening, setIsListening] = React.useState(false);
+  const [lastSubmissionMethod, setLastSubmissionMethod] = React.useState<
+    "text" | "voice" | null
+  >(null);
+
   const { toast } = useToast();
   const scrollAreaViewportRef = React.useRef<HTMLDivElement>(null);
-  const [isListening, setIsListening] = React.useState(false);
   const recognitionRef = React.useRef<SpeechRecognition | null>(null);
 
   React.useEffect(() => {
@@ -50,6 +54,110 @@ export default function ChatPage() {
         scrollAreaViewportRef.current.scrollHeight;
     }
   }, [messages]);
+  
+  React.useEffect(() => {
+    const chatContainer = document.getElementById("chat-container");
+    if (!chatContainer || !window.visualViewport) return;
+
+    const resizeHandler = () => {
+      chatContainer.style.height = `${window.visualViewport.height}px`;
+    };
+
+    window.visualViewport.addEventListener("resize", resizeHandler);
+    resizeHandler();
+
+    return () => {
+      window.visualViewport.removeEventListener("resize", resizeHandler);
+    };
+  }, []);
+
+  const speak = React.useCallback((textToSpeak: string) => {
+    const synth = window.speechSynthesis;
+    if (!synth) {
+      console.warn("Speech synthesis not supported in this browser.");
+      return;
+    }
+
+    if (synth.speaking) {
+      synth.cancel();
+    }
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+
+    const setVoiceAndSpeak = () => {
+      const voices = synth.getVoices();
+      let selectedVoice = voices.find(
+        (v) => v.lang.startsWith("en") && v.name.toLowerCase().includes("male")
+      );
+      if (!selectedVoice) {
+        selectedVoice = voices.find((v) => v.lang.startsWith("en"));
+      }
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+        utterance.rate = 1;
+        utterance.pitch = 1;
+      }
+      synth.speak(utterance);
+    };
+
+    if (synth.getVoices().length > 0) {
+      setVoiceAndSpeak();
+    } else {
+      synth.onvoiceschanged = setVoiceAndSpeak;
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (
+      lastMessage &&
+      lastMessage.role === "assistant" &&
+      !isLoading &&
+      lastSubmissionMethod === "voice"
+    ) {
+      speak(lastMessage.content);
+    }
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [messages, isLoading, lastSubmissionMethod, speak]);
+
+  const processUserMessage = React.useCallback(
+    async (content: string, method: "text" | "voice") => {
+      if (!content || isLoading) return;
+
+      setLastSubmissionMethod(method);
+
+      const userMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: content,
+      };
+
+      const newMessages = [...messages, userMessage];
+      setMessages(newMessages);
+      if (method === "text") setInput("");
+      setIsLoading(true);
+
+      try {
+        const aiMessage = await sendMessage(newMessages);
+        setMessages((prev) => [...prev, aiMessage]);
+      } catch (error) {
+        console.error("Error sending message:", error);
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "There was a problem sending your message.",
+        });
+        setMessages((prev) => prev.slice(0, -1)); // Remove user message on error
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, messages, toast]
+  );
 
   React.useEffect(() => {
     const SpeechRecognition =
@@ -67,8 +175,9 @@ export default function ChatPage() {
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      setInput(transcript);
+      setInput(transcript); // Keep input updated visually
       setIsListening(false);
+      processUserMessage(transcript, "voice");
     };
 
     recognition.onerror = (event) => {
@@ -86,85 +195,11 @@ export default function ChatPage() {
     };
 
     recognitionRef.current = recognition;
-  }, [toast]);
-
-  React.useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.role === "assistant" && !isLoading) {
-      const synth = window.speechSynthesis;
-      if (!synth) {
-        console.warn("Speech synthesis not supported in this browser.");
-        return;
-      }
-
-      const speak = (textToSpeak: string) => {
-        if (synth.speaking) {
-          synth.cancel();
-        }
-        const utterance = new SpeechSynthesisUtterance(textToSpeak);
-
-        const setVoiceAndSpeak = () => {
-          const voices = synth.getVoices();
-          let selectedVoice = voices.find(
-            (v) => v.lang.startsWith("en") && v.name.toLowerCase().includes("male")
-          );
-          if (!selectedVoice) {
-            selectedVoice = voices.find((v) => v.lang.startsWith("en"));
-          }
-          if (selectedVoice) {
-            utterance.voice = selectedVoice;
-            utterance.rate = 1;
-            utterance.pitch = 1;
-          }
-          synth.speak(utterance);
-        };
-
-        if (synth.getVoices().length > 0) {
-          setVoiceAndSpeak();
-        } else {
-          synth.onvoiceschanged = setVoiceAndSpeak;
-        }
-      };
-
-      speak(lastMessage.content);
-
-      return () => {
-        if (synth) {
-          synth.cancel();
-        }
-      };
-    }
-  }, [messages, isLoading]);
+  }, [toast, processUserMessage]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: input.trim(),
-    };
-
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      const aiMessage = await sendMessage(newMessages);
-      setMessages((prev) => [...prev, aiMessage]);
-    } catch (error) {
-      console.error("Error sending message:", error);
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "There was a problem sending your message.",
-      });
-      setMessages(messages);
-    } finally {
-      setIsLoading(false);
-    }
+    await processUserMessage(input.trim(), "text");
   };
 
   const handleListen = () => {
@@ -181,7 +216,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-dvh w-full flex-col items-center bg-background">
+    <div id="chat-container" className="flex w-full flex-col items-center bg-background">
       <div className="flex h-full w-full max-w-2xl flex-col sm:shadow-lg">
         <header className="flex items-center justify-between border-b bg-card p-2 sm:p-4">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -199,7 +234,7 @@ export default function ChatPage() {
         <ScrollArea className="flex-1" viewportRef={scrollAreaViewportRef}>
           <div className="space-y-4 p-2 sm:p-4">
             {messages.map((msg) => (
-              <ChatMessage key={msg.id} message={msg} />
+              <ChatMessage key={msg.id} message={msg} onSpeak={speak} />
             ))}
             {isLoading && <TypingIndicator />}
           </div>
