@@ -70,6 +70,26 @@ export async function getInitialMessage(): Promise<Message> {
   };
 }
 
+export async function addUserMessage(content: string): Promise<Message> {
+  if (!content) {
+    throw new Error("Message content cannot be empty.");
+  }
+
+  const messageData = {
+    sender: "Katyayani",
+    text: content,
+    timestamp: serverTimestamp(),
+  };
+
+  const docRef = await addDoc(messagesCol, messageData);
+
+  return {
+    id: docRef.id,
+    role: "user",
+    content: content,
+  };
+}
+
 export async function sendMessage(messages: Message[]): Promise<Message> {
   const history = messages
     .map((m) => `${m.role === "user" ? "Katyayani" : "Noor"}: ${m.content}`)
@@ -80,11 +100,8 @@ export async function sendMessage(messages: Message[]): Promise<Message> {
     throw new Error("Last message must be from the user");
   }
 
-  await addDoc(messagesCol, {
-    sender: "Katyayani",
-    text: lastMessage.content,
-    timestamp: serverTimestamp(),
-  });
+  // User message is now persisted separately before this function is called.
+  // The code to add it here has been removed.
 
   const input: GenerateResponseInput = {
     message: lastMessage.content,

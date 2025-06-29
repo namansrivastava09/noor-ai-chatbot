@@ -16,10 +16,6 @@ export function ChatMessage({
   const isUser = message.role === "user";
   const isAssistant = message.role === "assistant";
 
-  // Firestore IDs are 20 chars long, UUIDs are 36.
-  // This prevents deleting the temporary welcome message.
-  const canDelete = message.id.length < 30;
-
   return (
     <div
       className={cn(
@@ -36,7 +32,7 @@ export function ChatMessage({
         </Avatar>
       )}
 
-      {isUser && canDelete && (
+      {isUser && (
         <Button
           size="icon"
           variant="ghost"

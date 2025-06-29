@@ -11,6 +11,7 @@ import {
   sendMessage,
   getChatHistory,
   deleteMessage,
+  addUserMessage,
 } from "./actions";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -137,21 +138,20 @@ export default function ChatPage() {
       if (!content || isLoading) return;
 
       setLastSubmissionMethod(method);
-
-      const userMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "user",
-        content: content,
-      };
-
-      const newMessages = [...messages, userMessage];
-      setMessages(newMessages);
       if (method === "text") setInput("");
       setIsLoading(true);
 
+      const originalMessages = messages;
+
       try {
-        const aiMessage = await sendMessage(newMessages);
-        setMessages((prev) => [...prev, aiMessage]);
+        const persistedUserMessage = await addUserMessage(content);
+
+        const newMessagesForAI = [...originalMessages, persistedUserMessage];
+        setMessages(newMessagesForAI);
+
+        const aiMessage = await sendMessage(newMessagesForAI);
+
+        setMessages((prevMessages) => [...prevMessages, aiMessage]);
       } catch (error) {
         console.error("Error sending message:", error);
         toast({
@@ -159,7 +159,7 @@ export default function ChatPage() {
           title: "Uh oh! Something went wrong.",
           description: "There was a problem sending your message.",
         });
-        setMessages((prev) => prev.slice(0, -1)); // Remove user message on error
+        setMessages(originalMessages);
       } finally {
         setIsLoading(false);
       }
