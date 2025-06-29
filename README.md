@@ -1,68 +1,20 @@
-# Updating Your Live Noor AI Chatbot
+Technical Overview
 
-This guide provides the step-by-step process for making changes to your chatbot in Firebase Studio and deploying those updates to your live Netlify site.
+Noor Chat is a modern, full-stack chatbot application built with a focus on performance, user experience, and a serverless architecture. It leverages a powerful combination of cutting-edge technologies to deliver a dynamic and interactive conversation with a personalized AI.
 
-## How the Workflow Works
-
-Your code lives in three places:
-1.  **Firebase Studio:** Where you are editing the code now.
-2.  **Your Local Computer:** A middle-ground where you use `git` to send updates to GitHub.
-3.  **GitHub:** The "master copy" of your code that Netlify watches for changes.
-
-The process is: **Firebase Studio -> Your Computer -> GitHub -> Netlify (Live Site)**
-
----
-
-### Step 1: Download Your Updated Code
-
-After you've made changes here in Firebase Studio, you need to get the code onto your computer.
-
-1.  **Find the Download Button:** In the top bar of the Firebase Studio interface (the web page you are currently using), you will see a **"Download code"** button.
-2.  **Download the ZIP File:** Click this button. Your browser will download a `.zip` file containing your entire updated project.
-3.  **Unzip the Project:** Find the downloaded `.zip` file on your computer and extract its contents. This will create a new folder with all of your updated project files.
-
-### Step 2: Update Your Local GitHub Repository
-
-Now, you need to copy these new files into the project folder on your computer that is linked to GitHub.
-
-1.  **Open Both Folders:** Have two folders open on your screen:
-    *   The new folder you just unzipped.
-    *   Your original `noor-ai-chatbot` project folder (the one that is a `git` repository).
-2.  **Copy and Replace:** Select all files and folders inside the **newly unzipped folder**, copy them, and then paste them directly into your **original `noor-ai-chatbot` folder**. Your computer will ask if you want to replace the existing files. **Choose "Replace All"**. This updates your local project with the changes you made in Firebase Studio.
-
-### Step 3: Push the Changes to GitHub
-
-This is where you tell GitHub about the updates using a few simple `git` commands.
-
-1.  **Open a Terminal:** Open a terminal or command prompt and navigate into your local `noor-ai-chatbot` project folder.
-    ```bash
-    cd path/to/your/noor-ai-chatbot
-    ```
-2.  **Run Git Commands:** Run the following commands one by one.
-    ```bash
-    # Stage all the changes (new, modified, and deleted files)
-    git add .
-
-    # Commit the changes with a descriptive message
-    git commit -m "Updated the chatbot with new features"
-
-    # Push the commit to your main branch on GitHub
-    git push origin main
-    ```
-
-### Step 4: Automatic Deployment on Netlify
-
-This is the easiest step!
-
-Because you connected your GitHub repository to Netlify, Netlify automatically detects the `push` you just made. It will immediately start a new build and deploy your updated site. You don't have to do anything. You can watch the progress in your Netlify dashboard. Within a few minutes, your changes will be live.
-
----
-
-## Security: Protecting Your API Keys
-
-It is **EXTREMELY IMPORTANT** that your `GOOGLE_API_KEY` is not visible in your public GitHub repository.
-
-*   **Use Netlify Environment Variables:** Your API key should **only** be stored as an environment variable in your Netlify project settings. You have likely already done this during the initial setup.
-*   **Use `.gitignore`:** I have added a `.gitignore` file to your project. This is a special file that tells `git` to **ignore** certain files and folders. It will prevent you from accidentally uploading your `.env` file (which might contain secrets) or large folders like `node_modules` to GitHub.
-
-By following this process, you can safely and easily update your live chatbot anytime.
+Core Technologies
+Frontend Framework: Next.js 14 using the App Router. This enables a hybrid approach with Server Components for fast initial page loads and minimal client-side JavaScript, complemented by Client Components for rich interactivity.
+UI Library: React is used for building the component-based user interface, managed with modern hooks for state and side effects.
+Language: TypeScript is used throughout the project for robust, type-safe code that prevents common bugs and improves maintainability.
+Styling:
+Tailwind CSS: A utility-first CSS framework for rapid, responsive, and consistent styling.
+ShadCN UI: A collection of beautifully designed, accessible, and composable UI components built on Radix UI and Tailwind CSS.
+Generative AI:
+Google Gemini Pro: The underlying Large Language Model that powers the chatbot's conversational intelligence and personality emulation.
+Genkit (by Google): An open-source framework that structures the interaction with the Gemini API. It defines the prompts, manages the input/output schemas, and ensures reliable, production-ready AI flows.
+Backend & Database: Firebase Firestore: A NoSQL, real-time cloud database used to persist and retrieve the chat conversation history seamlessly.
+Deployment: Netlify: A platform for continuous integration and deployment (CI/CD), automatically building and hosting the live application from the main branch of the GitHub repository.
+Key Architectural Features
+Server Actions: The application uses Next.js Server Actions for all backend communication, such as sending, fetching, and deleting messages. This modern approach allows the client to call server-side functions directly and securely without the need to manually create and manage traditional API endpoints.
+Dynamic Rendering: The app is dynamically rendered, not statically exported. This is essential for the server-side logic (Server Actions, AI communication) to function correctly.
+Secure API Key Management: The sensitive GOOGLE_API_KEY is protected using Netlify's environment variables. The .gitignore file also prevents any local secrets from being accidentally committed to the public GitHub repository.
