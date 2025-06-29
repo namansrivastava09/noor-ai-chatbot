@@ -73,6 +73,15 @@ This is a **critical security step** to ensure Firebase allows your live app to 
 
 Your chatbot is now live, secure, and ready to be shared with Katyayani!
 
+### Security: Making Your Repository Public
+
+It is safe to make your GitHub repository for this project public. The most important secret, your `GOOGLE_API_KEY`, is protected in two ways:
+
+*   **Netlify Environment Variables**: For your live website, the API key is stored securely in your Netlify project settings. It is never included in the code that is visible on GitHub.
+*   **`.gitignore` File**: This project includes a `.gitignore` file. This special file tells Git to ignore certain files and folders, most importantly the `.env` file where you might store your API key for local testing. This prevents you from ever accidentally committing your secrets to GitHub.
+
+As long as you never write your API key directly into any file that isn't in `.gitignore`, your repository is safe to be public.
+
 ### Common Mistakes to Avoid
 *   **Forgetting Environment Variables**: If you forget to add the `GOOGLE_API_KEY` in Netlify, the AI will not work.
 *   **Wrong Publish Directory**: Make sure the publish directory is set to `.next`. If it's set to something else (like `out` or `build`), the deployment will fail.
