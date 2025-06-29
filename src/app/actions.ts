@@ -32,29 +32,9 @@ const docToMessage = (doc: any): Message => {
   };
 };
 
-function getDateTimeInfo() {
-  const now = new Date();
-  const hours = now.getHours().toString().padStart(2, "0");
-  const minutes = now.getMinutes().toString().padStart(2, "0");
-
-  return {
-    time: `${hours}:${minutes}`,
-    date: now.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }),
-    day: now.toLocaleDateString("en-GB", { weekday: "long" }),
-  };
-}
-
 export async function getWelcomeMessage(): Promise<Message> {
-  const { time, date, day } = getDateTimeInfo();
-  const input: GenerateInitialResponseInput = {
-    currentTime: time,
-    currentDate: date,
-    currentDay: day,
-  };
+  // Input for the initial response is now empty as time is not needed.
+  const input: GenerateInitialResponseInput = {};
   const content = await generateInitialResponse(input);
 
   // Note: We are NOT saving this to Firestore.
@@ -73,12 +53,7 @@ export async function getChatHistory(): Promise<Message[]> {
 }
 
 export async function getInitialMessage(): Promise<Message> {
-  const { time, date, day } = getDateTimeInfo();
-  const input: GenerateInitialResponseInput = {
-    currentTime: time,
-    currentDate: date,
-    currentDay: day,
-  };
+  const input: GenerateInitialResponseInput = {};
   const content = await generateInitialResponse(input);
 
   const messageData = {
@@ -111,14 +86,9 @@ export async function sendMessage(messages: Message[]): Promise<Message> {
     timestamp: serverTimestamp(),
   });
 
-  const { time, date, day } = getDateTimeInfo();
-
   const input: GenerateResponseInput = {
     message: lastMessage.content,
     chatHistory: history,
-    currentTime: time,
-    currentDate: date,
-    currentDay: day,
   };
 
   const result = await generateResponse(input);

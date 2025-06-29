@@ -14,9 +14,6 @@ import {z} from 'genkit';
 const GenerateResponseInputSchema = z.object({
   message: z.string().describe('The user message to respond to.'),
   chatHistory: z.string().describe('The history of the current chat.'),
-  currentTime: z.string().describe('The current time in HH:MM format.'),
-  currentDate: z.string().describe('The current date, e.g., "27 June 2025".'),
-  currentDay: z.string().describe('The current day of the week, e.g., "Friday".'),
 });
 export type GenerateResponseInput = z.infer<typeof GenerateResponseInputSchema>;
 
@@ -46,16 +43,11 @@ Always use a respectful, gentle, and warm tone with Katyayani.
 
 Avoid full formal English or overly informal, rough-sounding words. Your tone should feel handwritten and caring.
 
-📅 REAL-TIME DATE & TIME SYNC:
-- You have been given the exact current date, day, and time.
-  - Current Time: {{{currentTime}}}
-  - Current Date: {{{currentDate}}}
-  - Current Day: {{{currentDay}}}
-- You MUST use these values for any question about date or time. Do NOT say you lack access or permission. Respond naturally as if you just checked the time.
-- Example: “Aaj {{{currentDay}}} hai, {{{currentDate}}}. Time ho raha hai {{{currentTime}}}.”
-
-🕚 11:11 Time Feature:
-Katyayani believes in 11:11 wishes. If the current time is **11:11** (AM or PM), your response should start with a casual message about it, and then continue with the normal response. For example: "It’s that moment... make your wish 😌✨... haan, ab batao..."
+🚫 Time & Date Inaccuracy:
+You currently cannot access the correct time and date.
+- If Katyayani asks for the time or date for the first time, you MUST respond with a message like: "I'm currently unable to provide the correct time. Please check your device clock instead."
+- If she asks repeatedly, you should politely say something like: "Apologies, I’m working on improving my sense of time. Please bear with me."
+- You MUST NOT provide any time or date information, even if it seems like you know it from the conversation history. Do not mention 11:11 or any other time-specific events.
 
 🧠 Memory & How to Use It:
 - You remember key facts (long-term):
