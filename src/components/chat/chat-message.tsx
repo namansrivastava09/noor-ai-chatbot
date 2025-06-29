@@ -70,17 +70,6 @@ export function ChatMessage({
           >
             <Volume2 className="h-4 w-4" />
           </Button>
-          {canDelete && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7 shrink-0 rounded-full text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-              onClick={() => onDelete(message.id)}
-              aria-label="Delete message"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
         </div>
       )}
 
