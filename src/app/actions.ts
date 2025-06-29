@@ -13,6 +13,8 @@ import type { Message } from "@/lib/types";
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   getDocs,
   orderBy,
   query,
@@ -132,4 +134,12 @@ export async function sendMessage(messages: Message[]): Promise<Message> {
     role: "assistant",
     content: result.response,
   };
+}
+
+export async function deleteMessage(messageId: string): Promise<void> {
+  if (!messageId) {
+    throw new Error("Message ID is required to delete a message.");
+  }
+  const messageRef = doc(firestore, "users", USER_ID, "messages", messageId);
+  await deleteDoc(messageRef);
 }

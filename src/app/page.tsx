@@ -10,6 +10,7 @@ import {
   getInitialMessage,
   sendMessage,
   getChatHistory,
+  deleteMessage,
 } from "./actions";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -195,6 +196,25 @@ export default function ChatPage() {
     }
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    const originalMessages = messages;
+    setMessages((prevMessages) =>
+      prevMessages.filter((msg) => msg.id !== messageId)
+    );
+
+    try {
+      await deleteMessage(messageId);
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to delete message",
+        description: "Please try again.",
+      });
+      setMessages(originalMessages);
+    }
+  };
+
   React.useEffect(() => {
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
@@ -286,7 +306,12 @@ export default function ChatPage() {
               </div>
             )}
             {messages.map((msg) => (
-              <ChatMessage key={msg.id} message={msg} onSpeak={speak} />
+              <ChatMessage
+                key={msg.id}
+                message={msg}
+                onSpeak={speak}
+                onDelete={handleDeleteMessage}
+              />
             ))}
             {isLoading && messages.length > 0 && <TypingIndicator />}
           </div>
