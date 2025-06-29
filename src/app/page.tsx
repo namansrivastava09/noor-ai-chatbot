@@ -1,11 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { Send, User, Mic, MicOff, Volume2 } from "lucide-react";
+import { Send, User, Mic, MicOff, Volume2, History } from "lucide-react";
 
 import type { Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { getInitialMessage, sendMessage, getChatHistory } from "./actions";
+import {
+  getWelcomeMessage,
+  getInitialMessage,
+  sendMessage,
+  getChatHistory,
+} from "./actions";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -19,6 +24,7 @@ export default function ChatPage() {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [input, setInput] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(true);
+  const [historyLoaded, setHistoryLoaded] = React.useState(false);
   const [isListening, setIsListening] = React.useState(false);
   const [lastSubmissionMethod, setLastSubmissionMethod] = React.useState<
     "text" | "voice" | null
@@ -29,28 +35,25 @@ export default function ChatPage() {
   const recognitionRef = React.useRef<SpeechRecognition | null>(null);
 
   React.useEffect(() => {
-    const fetchHistory = async () => {
+    const fetchWelcomeMessage = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        let history = await getChatHistory();
-        if (history.length === 0) {
-          const initialMessage = await getInitialMessage();
-          history = [initialMessage];
-        }
-        setMessages(history);
+        const welcomeMessage = await getWelcomeMessage();
+        setMessages([welcomeMessage]);
       } catch (error) {
-        console.error("Error fetching chat history:", error);
+        console.error("Error fetching welcome message:", error);
         toast({
           variant: "destructive",
           title: "Uh oh! Something went wrong.",
-          description: "Could not load the conversation.",
+          description: "Could not start the conversation.",
         });
       } finally {
         setIsLoading(false);
       }
     };
-    fetchHistory();
-  }, [toast]);
+    fetchWelcomeMessage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
     if (scrollAreaViewportRef.current) {
@@ -58,7 +61,7 @@ export default function ChatPage() {
         scrollAreaViewportRef.current.scrollHeight;
     }
   }, [messages]);
-  
+
   React.useEffect(() => {
     const chatContainer = document.getElementById("chat-container");
     if (!chatContainer || !window.visualViewport) return;
@@ -163,6 +166,35 @@ export default function ChatPage() {
     [isLoading, messages, toast]
   );
 
+  const handleLoadHistory = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      let history = await getChatHistory();
+      if (history.length > 0) {
+        setMessages(history);
+      } else {
+        // First time ever loading history and it's empty
+        const initialMessage = await getInitialMessage();
+        setMessages([initialMessage]);
+        toast({
+          title: "Welcome!",
+          description: "This is the beginning of your conversation.",
+        });
+      }
+      setHistoryLoaded(true);
+    } catch (error) {
+      console.error("Error loading chat history:", error);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Could not load the conversation.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   React.useEffect(() => {
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
@@ -220,7 +252,10 @@ export default function ChatPage() {
   };
 
   return (
-    <div id="chat-container" className="flex w-full flex-col items-center bg-background">
+    <div
+      id="chat-container"
+      className="flex w-full flex-col items-center bg-background"
+    >
       <div className="flex h-full w-full max-w-2xl flex-col sm:shadow-lg">
         <header className="flex items-center justify-between border-b bg-card p-2 sm:p-4">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -237,10 +272,23 @@ export default function ChatPage() {
 
         <ScrollArea className="flex-1" viewportRef={scrollAreaViewportRef}>
           <div className="space-y-4 p-2 sm:p-4">
+            {!historyLoaded && messages.length > 0 && !isLoading && (
+              <div className="flex justify-center py-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLoadHistory}
+                  disabled={isLoading}
+                >
+                  <History className="mr-2 h-4 w-4" />
+                  Load Conversation
+                </Button>
+              </div>
+            )}
             {messages.map((msg) => (
               <ChatMessage key={msg.id} message={msg} onSpeak={speak} />
             ))}
-            {isLoading && <TypingIndicator />}
+            {isLoading && messages.length > 0 && <TypingIndicator />}
           </div>
         </ScrollArea>
 

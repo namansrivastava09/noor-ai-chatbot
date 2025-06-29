@@ -46,6 +46,24 @@ function getDateTimeInfo() {
   };
 }
 
+export async function getWelcomeMessage(): Promise<Message> {
+  const { time, date, day } = getDateTimeInfo();
+  const input: GenerateInitialResponseInput = {
+    currentTime: time,
+    currentDate: date,
+    currentDay: day,
+  };
+  const content = await generateInitialResponse(input);
+
+  // Note: We are NOT saving this to Firestore.
+  // It's just a temporary welcome message.
+  return {
+    id: crypto.randomUUID(), // Use a random UUID since it's not from DB
+    role: "assistant",
+    content,
+  };
+}
+
 export async function getChatHistory(): Promise<Message[]> {
   const q = query(messagesCol, orderBy("timestamp", "asc"));
   const querySnapshot = await getDocs(q);
